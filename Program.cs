@@ -1,4 +1,4 @@
-﻿#define debug
+﻿
 
 using System;
 using System.IO;
@@ -51,9 +51,9 @@ class Program
             }
         }
 
-#if debug
+
         Console.WriteLine("filesorter started correctly.");
-#endif
+
 
         Console.ReadKey();
     }
