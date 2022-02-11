@@ -1,145 +1,94 @@
-﻿
-
+﻿#define debug
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
 class Program
 {
-    public static FileInfo? info;
+    internal static FileInfo info;
+    internal static Dictionary<string, List<string>> types = new Dictionary<string, List<string>>();
 
-    public static string[] folders = { "Images", "Music", "Video", "Documents", "Archives", "Executable", "Other" };
-
-    public static string[] ImageTypes = { ".png", ".jpeg", ".bmp", ".gif", ".jpg", ".mpo", ".png", ".arw4" };
-    public static string[] MusicTypes = { ".mp3", ".wav", ".m4a", ".flac", ".mp3", ".wma", ".aac"};
-    public static string[] VideoTypes = { ".mp4", ".avi", ".flv", ".wmv", ".mkv", ".mpg", ".mpe", ".mpeg", ".m2ts", ".mts", ".divx", ".asf", ".wmv", ".divx", ".ogv", ".3gp", ".3g2", ".rm", ".rmvb", ".mov", ".flv", ".mvc"};
-    public static string[] DocumentTypes = { ".doc", ".ppt", ".xls", ".txt", ".pdf" };
-    public static string[] ArchiveTypes = { ".zip", ".rar", ".7z", ".tar", ".gzip", ".bzip2", ".apk", ".ipa", ".nrg" };
-    public static string[] ExecutableTypes = { ".exe", ".bat", ".com", ".jar", ".iso" };
-    public static string[] Trash = { ".torrent", ".lnk" };
+    static string FilesDirectory = @"C:\Users\Admin\Desktop\Files";
 
     private static void Main(string[] args)
     {
-        string? path;
-
-        try
+        if (!Directory.Exists(FilesDirectory))
         {
-            path = args[0];
-        }
-        catch
-        {
-            Console.WriteLine("No path specified");
-            return;
+            Directory.CreateDirectory(FilesDirectory);
         }
 
-        if (!Directory.Exists(path))
+        types.Add("Images", new List<string>() { ".png", ".jpeg", ".bmp", ".gif", ".jpg", ".mpo", ".png", ".arw4" });
+        types.Add("Music", new List<string>() { ".mp3", ".wav", ".m4a", ".flac", ".mp3", ".wma", ".aac" });
+        types.Add("Video", new List<string>() { ".mp4", ".avi", ".flv", ".wmv", ".mkv", ".mpg", ".mpe", ".mpeg", ".m2ts", ".mts", ".divx", ".asf", ".wmv", ".divx", ".ogv", ".3gp", ".3g2", ".rm", ".rmvb", ".mov", ".flv", ".mvc" });
+        types.Add("Document", new List<string>() { ".doc", ".ppt", ".xls", ".txt", ".pdf" });
+        types.Add("Archive", new List<string>() { ".zip", ".rar", ".7z", ".tar", ".gzip", ".bzip2", ".apk", ".ipa", ".nrg" });
+        types.Add("Executable", new List<string>() { ".exe", ".bat", ".com", ".jar", ".iso" });
+        types.Add("Trash", new List<string>() { ".torrent", ".lnk" });
+
+        foreach (string folder in types.Keys)
         {
-            Directory.CreateDirectory(path);
+            if (!Directory.Exists(FilesDirectory + @"\" + folder))
+            {
+                Directory.CreateDirectory(FilesDirectory + @"\" + folder);
+            }
         }
 
-        FileSystemWatcher watcher = new FileSystemWatcher(path, "*.*");
+        if (!Directory.Exists(FilesDirectory + "//Other"))
+        {
+            Directory.CreateDirectory(FilesDirectory + "//Other");
+        }
+
+        FileSystemWatcher watcher = new FileSystemWatcher(FilesDirectory, "*.*");
         watcher.IncludeSubdirectories = false;
         watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Attributes | NotifyFilters.CreationTime;
         watcher.Created += new FileSystemEventHandler(SortFile);
         watcher.EnableRaisingEvents = true;
 
-        foreach (string folder in folders)
-        {
-            if (!Directory.Exists(path + @"\" + folder))
-            {
-                Directory.CreateDirectory(path + @"\" + folder);
-            }
-        }
-
-
-        Console.WriteLine("filesorter started correctly.");
-
-
-        Console.ReadKey();
+        while (true) { };
     }
 
     private static void SortFile(object sender, FileSystemEventArgs CurrentFile)
     {
-        for(int i = 0; i < 10; i++)
+#if debug
+        Console.WriteLine("Sort Process");
+#endif
+        info = new FileInfo(CurrentFile.FullPath);
+
+        foreach (var type in types)
         {
-            info = new FileInfo(CurrentFile.FullPath);
-            try
+#if debug
+            Console.WriteLine("1 step");
+#endif
+            foreach (var name in type.Value)
             {
-                foreach (var type in ImageTypes)
+#if debug
+                Console.WriteLine(name);
+#endif
+                if (name == info.Extension)
                 {
-                    if (info.Extension == type)
+                    for (int i = 0; i < 10; i++)
                     {
-                        info.MoveTo(info.Directory + "\\Images\\" + info.Name, true);
-                        return;
+                        try
+                        {
+#if debug
+                            Console.WriteLine(FilesDirectory + "\\" + type.Key.ToString() + "\\");
+                            info.MoveTo(FilesDirectory + "\\" + type.Key.ToString() + "\\" + info.Name);
+                            break;
+#endif
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Thread.Sleep(1000);
+                            continue;
+                        }
                     }
+                    return;
                 }
-
-                foreach (var type in MusicTypes)
-                {
-                    if (info.Extension == type)
-                    {
-                        info.MoveTo(info.Directory + "\\Music\\" + info.Name, true);
-                        return;
-                    }
-                }
-
-                foreach (var type in VideoTypes)
-                {
-                    if (info.Extension == type)
-                    {
-                        info.MoveTo(info.Directory + "\\Video\\" + info.Name, true);
-                        return;
-                    }
-                }
-
-                foreach (var type in DocumentTypes)
-                {
-                    if (info.Extension == type)
-                    {
-                        info.MoveTo(info.Directory + "\\Documents\\" + info.Name, true);
-                        return;
-                    }
-                }
-
-                foreach (var type in ArchiveTypes)
-                {
-                    if (info.Extension == type)
-                    {
-                        info.MoveTo(info.Directory + "\\Archives\\" + info.Name, true);
-                        return;
-                    }
-                }
-
-                foreach (var type in ExecutableTypes)
-                {
-                    if (info.Extension == type)
-                    {
-                        info.MoveTo(info.Directory + "\\Executable\\" + info.Name, true);
-                        return;
-                    }
-                }
-
-                foreach (var type in Trash)
-                {
-                    if (info.Extension == type)
-                    {
-                        System.Threading.Thread.Sleep(100);
-                        info.Delete();
-                        return;
-                    }
-                }
-
-                info.MoveTo(info.Directory + "\\Other\\" + info.Name, true);
-
-                return;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("The file could not be moved: " + info.Name + info.Extension + " " + ex.Message);
             }
 
-            Thread.Sleep(1000);
+            info.MoveTo(FilesDirectory + "\\Other\\" + info.Name);
         }
     }
 }
-
