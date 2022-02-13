@@ -1,4 +1,5 @@
-﻿#define debug
+﻿#define eye
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,13 +7,19 @@ using System.Threading;
 
 class Program
 {
-    internal static Dictionary<string, List<string>> types = new Dictionary<string, List<string>>();
-    static string mainPath = "V:\\Files";
+    internal static Dictionary<string, List<string>> types = new();
+    static readonly string mainPath = "V:\\Files";
 
     private static void Main()
     {
+#if eye
+        Console.WriteLine("Sorter start");
+#endif
         if (!Directory.Exists(mainPath))
         {
+#if eye
+            Console.WriteLine("Create Dir: " + mainPath);
+#endif
             Directory.CreateDirectory(mainPath);
         }
 
@@ -28,29 +35,30 @@ class Program
         {
             if (!Directory.Exists(mainPath + "\\" +  folder))
             {
+#if eye
+                Console.WriteLine("Create Dir: " + mainPath + "\\" + folder);
+#endif
                 Directory.CreateDirectory(mainPath + "\\" + folder);
             }
         }
 
         if (!Directory.Exists(mainPath + "\\Other"))
         {
+#if eye
+            Console.WriteLine("Create Dir: " + mainPath + "\\Other");
+#endif
+
             Directory.CreateDirectory(mainPath + "\\Other");
         }
-
-        /*
-        FileSystemWatcher watcher = new FileSystemWatcher(mainPath, "*.*");
-        watcher.IncludeSubdirectories = false;
-        watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Attributes | NotifyFilters.CreationTime;
-        watcher.Created += sortFile;
-        watcher.EnableRaisingEvents = true;
-
-        */
 
         while (true)
         {
             if (Directory.GetFiles(mainPath).Length > 0)
             {
-                sortFile(Directory.GetFiles(mainPath)[0]);
+#if eye
+                Console.WriteLine("Start sort file: " + Directory.GetFiles(mainPath)[0]);
+#endif
+                SortFile(Directory.GetFiles(mainPath)[0]);
             }
 
             Thread.Sleep(1000);
@@ -58,9 +66,9 @@ class Program
        
     }
 
-    private static void sortFile(string filePath)
+    private static void SortFile(string filePath)
     {
-        FileInfo fileInfo = new FileInfo(filePath);
+        FileInfo fileInfo = new(filePath);
          
         foreach (KeyValuePair<string, List<string>> type in types)
         {
@@ -68,16 +76,23 @@ class Program
             {
                 if ("." + name == fileInfo.Extension.ToLower())
                 {
-                    moveFile(fileInfo, type.Key.ToString());
+#if eye
+                    Console.WriteLine("Type found: " + "." + name);
+#endif
+                    MoveFile(fileInfo, type.Key.ToString());
                     return;
                 }
             }
         }
 
-        moveFile(fileInfo, "Other");
+#if eye
+        Console.WriteLine("Type not found, file try send to \"Other\"");
+#endif
+
+        MoveFile(fileInfo, "Other"); 
     }
 
-    private static void moveFile(FileInfo fileInfo, string type)
+    private static void MoveFile(FileInfo fileInfo, string type)
     {
         try
         {
@@ -86,29 +101,46 @@ class Program
 
             if (File.Exists(newPath + fileInfo.Name))
             {
-                newName = getRenamedFile(fileInfo, newPath);
+#if eye
+                Console.WriteLine("Name exist: " + fileInfo.Name);
+#endif
+                newName = GetRenamedFile(fileInfo, newPath);
             }
+
+#if eye
+            Console.WriteLine("New name: " + newName);
+#endif
 
             fileInfo.MoveTo(newPath + newName + fileInfo.Extension);
             return;
         }
         catch (FileNotFoundException)
         {
+#if eye
+            Console.WriteLine("FileNotFoundException");
+#endif
             return;
         }
         catch (IOException)
         {
+#if eye
+            Console.WriteLine("IOException.. Retry");
+#endif
+
             Thread.Sleep(1000);
 
-            moveFile(fileInfo, type);
+            MoveFile(fileInfo, type);
         }
         catch
         {
+#if eye
+            Console.WriteLine("Other exception");
+#endif
             return;
         }
     }
 
-    private static string getRenamedFile(FileInfo fileInfo, string path)
+    private static string GetRenamedFile(FileInfo fileInfo, string path)
     {
         string currentName;
         int filecount = 1;
