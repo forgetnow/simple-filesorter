@@ -16,9 +16,9 @@ class Program
             Directory.CreateDirectory(mainPath);
         }
 
-        types.Add("Images", new List<string>() { "png", "jpeg", "bmp", "gif", "jpg", "mpo", "png", "arw4" });
-        types.Add("Music", new List<string>() { "mp3", "wav", "m4a", "flac", "mp3", "wma", "aac" });
-        types.Add("Video", new List<string>() { "mp4", "avi", "flv", "wmv", "mkv", "mpg", "mpe", "mpeg", "m2ts", "mts", "divx", "asf", "wmv", "divx", "ogv", "3gp", "3g2", "rm", "rmvb", "mov", "flv", "mvc" });
+        types.Add("Images", new List<string>() { });
+        types.Add("Music", new List<string>() { });
+        types.Add("Video", new List<string>() { });
         types.Add("Document", new List<string>() { "doc", "ppt", "xls", "txt", "pdf" });
         types.Add("Archive", new List<string>() { "zip", "rar", "7z", "tar", "gzip", "bzip2", "apk", "ipa", "nrg" });
         types.Add("Executable", new List<string>() { "exe", "bat", "com", "jar", "iso" });
@@ -54,7 +54,6 @@ class Program
         {
             foreach (string name in type.Value)
             {
-                Console.WriteLine("." + name);
                 if ("." + name == fileInfo.Extension)
                 {
                     moveFile(fileInfo, type.Key.ToString());
@@ -110,7 +109,6 @@ class Program
         }
         while (File.Exists(path + currentName + fileInfo.Extension));
 
-        Console.WriteLine(currentName);
         return currentName;
     }
 }
