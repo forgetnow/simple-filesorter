@@ -54,7 +54,7 @@ class Program
         {
             foreach (string name in type.Value)
             {
-                if ("." + name == fileInfo.Extension)
+                if ("." + name == fileInfo.Extension.ToLower())
                 {
                     moveFile(fileInfo, type.Key.ToString());
                     return;
